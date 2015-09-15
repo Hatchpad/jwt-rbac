@@ -1,0 +1,31 @@
+{
+  "name": "@hatchpad/jwt-rbac",
+  "version": "1.0.0",
+  "description": "Role-based access control(RBAC) using JSON Web Tokens(JWT) for Express",
+  "main": "index.js",
+  "dependencies": {
+    "jwt-simple": "^0.3.1",
+    "dot-object": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "jasmine-node ./spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonmullins/jwt-rbac.git"
+  },
+  "author": "Jason Mullins",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/jasonmullins/jwt-rbac/issues"
+  },
+  "homepage": "https://github.com/jasonmullins/jwt-rbac#readme",
+  "keywords": [
+    "JWT",
+    "RBAC",
+    "Authentication",
+    "auth",
+    "express"
+  ]
+}
