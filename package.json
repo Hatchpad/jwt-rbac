@@ -1,7 +1,7 @@
 {
   "name": "@hatchpad/jwt-rbac",
   "version": "1.0.0",
-  "description": "Role-based access control(RBAC) using JSON Web Tokens(JWT) for Express",
+  "description": "Express Role-based access control(RBAC) using JSON Web Tokens(JWT)",
   "main": "index.js",
   "dependencies": {
     "jwt-simple": "^0.3.1",
