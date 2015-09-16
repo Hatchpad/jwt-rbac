@@ -17,6 +17,7 @@ module.exports = function(options) {
   var secret = options.secret;
   var token = options.token || defaultToken;
   var enforceExp = options.enforceExp === false ? false : true;
+  var authRequired = options.authRequired === false ? false : true;
 
   if (roles && !Array.isArray(roles) && typeof(roles) !== 'function') {
     throw new ConfigError(CONFIG_ERROR, { message: 'roles must be an array or a function' });
@@ -164,7 +165,11 @@ module.exports = function(options) {
       },
       function() {
         var error = dot.pick('_meta.unauthorizedError', this.getData());
-        next(error);
+        if (!authRequired && error.code === 'token_required') {
+          next();
+        } else {
+          next(error);
+        }
       }
     );
   };

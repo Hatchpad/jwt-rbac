@@ -205,6 +205,19 @@ describe('functional', function() {
       });
     });
 
+    describe('required when authRequired is false', function() {
+      beforeEach(function() {
+        error = null;
+        req = {headers:{}};
+      });
+
+      it('authorizes', function() {
+        rbacFunc = rbac({secret:staticSecret, authRequired:false});
+        rbacFunc(req, null, next);
+        expect(error).toBe(undefined);
+      });
+    });
+
     describe('invalid', function() {
       beforeEach(function() {
         error = null;
