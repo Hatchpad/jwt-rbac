@@ -18,6 +18,7 @@ module.exports = function(options) {
   var token = options.token || defaultToken;
   var enforceExp = options.enforceExp === false ? false : true;
   var authRequired = options.authRequired === false ? false : true;
+  var privilege = options.privilege;
 
   if (roles && !Array.isArray(roles) && typeof(roles) !== 'function') {
     throw new ConfigError(CONFIG_ERROR, { message: 'roles must be an array or a function' });
@@ -37,6 +38,10 @@ module.exports = function(options) {
 
   if (typeof(token) !== 'string' && typeof(token) !== 'function') {
     throw new ConfigError(CONFIG_ERROR, { message: 'token must be a string or a function' });
+  }
+
+  if (privilege && typeof(privilege) !== 'function') {
+    throw new ConfigError(CONFIG_ERROR, { message: 'privilege must be a function' });
   }
 
   var setVal = function(key, val, errorCode, errorMessage) {
@@ -81,14 +86,19 @@ module.exports = function(options) {
       setUnauthorizedError.bind(this)('token_required', 'Token is required in req.headers["x-auth-token"]');
       this.reject();
     } else {
+      var resolve = true;
       try {
         var decodedToken = jwt.decode(token, secret);
         var req = dot.pick('req', this.getData());
         dot.str('_meta.decodedToken', decodedToken, this.getData());
         req.user = decodedToken;
-        this.resolve();
       } catch (err) {
         setUnauthorizedError.bind(this)('invalid_token', 'Cannot decode auth token');
+        resolve = false;
+      }
+      if (resolve) {
+        this.resolve();
+      } else {
         this.reject();
       }
     }
@@ -106,6 +116,21 @@ module.exports = function(options) {
         setUnauthorizedError.bind(this)('token_expired', 'This token has expired');
         this.reject();
       }
+    }
+  };
+
+  var checkPrivilege = function() {
+    if (!privilege) {
+      this.resolve();
+    } else {
+      privilege(this.getData().req, this.getData()._meta.decodedToken, function(hasPriv) {
+        if (hasPriv) {
+          this.resolve();
+        } else {
+          setUnauthorizedError.bind(this)('missing_privilege', 'This token lacks the required privilege');
+          this.reject();
+        }
+      }.bind(this));
     }
   };
 
@@ -159,6 +184,7 @@ module.exports = function(options) {
     .$(getScopes)
     .$(checkRoles)
     .$(checkScopes)
+    .$(checkPrivilege)
     .exec(
       function() {
         next();

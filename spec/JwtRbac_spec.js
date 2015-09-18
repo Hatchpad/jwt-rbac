@@ -234,6 +234,36 @@ describe('functional', function() {
     });
   });
 
+  describe('privileges', function() {
+    var rbacFunc, privilegeFunc, token, req;
+
+    beforeEach(function() {
+      error = null;
+      token = createToken({any:'thing'}, staticSecret);
+      req = {headers: {'x-auth-token': token}};
+    });
+
+    it('authorizes correctly', function() {
+      privilegeFunc = function(req, token, cb) {
+        cb(true);
+      };
+      rbacFunc = rbac({privilege: privilegeFunc, secret:staticSecret});
+      rbacFunc(req, null, next);
+      expect(error).toBe(undefined);
+    });
+
+    it('unauthorizes correctly', function() {
+      privilegeFunc = function(req, token, cb) {
+        cb(false);
+      };
+      rbacFunc = rbac({privilege: privilegeFunc, secret:staticSecret});
+      rbacFunc(req, null, next);
+      expect(error.name).toBe(UNAUTHORIZED_ERROR);
+      expect(error.code).toBe('missing_privilege');
+      expect(error.message).toBe('This token lacks the required privilege');
+    });
+  });
+
   describe('smoke tests with functions', function() {
     var rbacFunc, token, req, rolesFunc1, rolesFunc2;
 
