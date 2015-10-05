@@ -264,6 +264,36 @@ describe('functional', function() {
     });
   });
 
+  describe('revoked', function() {
+    var rbacFunc, privilegeFunc, token, req;
+
+    beforeEach(function() {
+      error = null;
+      token = createToken({any:'thing'}, staticSecret);
+      req = {headers: {'x-auth-token': token}};
+    });
+
+    it('authorizes correctly', function() {
+      revokedFunc = function(req, token, cb) {
+        cb(false);
+      };
+      rbacFunc = rbac({revoked: revokedFunc, secret:staticSecret});
+      rbacFunc(req, null, next);
+      expect(error).toBe(undefined);
+    });
+
+    it('unauthorizes correctly', function() {
+      revokedFunc = function(req, token, cb) {
+        cb(true);
+      };
+      rbacFunc = rbac({revoked: revokedFunc, secret:staticSecret});
+      rbacFunc(req, null, next);
+      expect(error.name).toBe(UNAUTHORIZED_ERROR);
+      expect(error.code).toBe('token_revoked');
+      expect(error.message).toBe('This token has been revoked');
+    });
+  });
+
   describe('smoke tests with functions', function() {
     var rbacFunc, token, req, rolesFunc1, rolesFunc2;
 

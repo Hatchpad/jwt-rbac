@@ -19,6 +19,7 @@ module.exports = function(options) {
   var enforceExp = options.enforceExp === false ? false : true;
   var authRequired = options.authRequired === false ? false : true;
   var privilege = options.privilege;
+  var revoked = options.revoked;
 
   if (roles && !Array.isArray(roles) && typeof(roles) !== 'function') {
     throw new ConfigError(CONFIG_ERROR, { message: 'roles must be an array or a function' });
@@ -42,6 +43,10 @@ module.exports = function(options) {
 
   if (privilege && typeof(privilege) !== 'function') {
     throw new ConfigError(CONFIG_ERROR, { message: 'privilege must be a function' });
+  }
+
+  if (revoked && typeof(revoked) !== 'function') {
+    throw new ConfigError(CONFIG_ERROR, { message: 'revoked must be a function' });
   }
 
   var setVal = function(key, val, errorCode, errorMessage) {
@@ -134,6 +139,21 @@ module.exports = function(options) {
     }
   };
 
+  var checkRevoked = function() {
+    if (!revoked) {
+      this.resolve();
+    } else {
+      revoked(this.getData().req, this.getData()._meta.decodedToken, function(isRevoked) {
+        if (isRevoked) {
+          setUnauthorizedError.bind(this)('token_revoked', 'This token has been revoked');
+          this.reject();
+        } else {
+          this.resolve();
+        }
+      }.bind(this));
+    }
+  };
+
   var setUnauthorizedError = function(code, message) {
     var error = new
     dot.str('_meta.unauthorizedError', new UnauthorizedError(code, message), this.getData());
@@ -185,6 +205,7 @@ module.exports = function(options) {
     .$(checkRoles)
     .$(checkScopes)
     .$(checkPrivilege)
+    .$(checkRevoked)
     .exec(
       function() {
         next();
