@@ -199,20 +199,22 @@ module.exports = function(options) {
     .$(getSecret)
     .$(getToken)
     .$(decodeToken)
+    .$(checkRevoked)
     .$(checkExp)
     .$(getRoles)
     .$(getScopes)
     .$(checkRoles)
     .$(checkScopes)
     .$(checkPrivilege)
-    .$(checkRevoked)
     .exec(
       function() {
         next();
       },
       function() {
         var error = dot.pick('_meta.unauthorizedError', this.getData());
-        if (!authRequired && error.code === 'token_required') {
+        if (!authRequired && error.code === 'token_revoked') {
+          next(error);
+        } else if (!authRequired && error.code === 'token_required') {
           next();
         } else {
           next(error);
