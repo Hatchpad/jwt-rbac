@@ -67,6 +67,14 @@ describe('options and default params', function() {
   it('should not throw an error if token is a function', function() {
     expect( function() { rbac({scopes:[], secret:'sec', token:aFunc});} ).not.toThrow(new Error('token must be a string or a function'));
   });
+
+  it('should throw an error if enforceExp is not a function or boolean', function() {
+    expect( function() { rbac({scopes:[], secret:'sec', enforceExp:4});} ).toThrow(new Error('enforceExp must be a boolean or a function'));
+  });
+
+  it('should not throw an error if enforceExp is true', function() {
+    expect( function() { rbac({scopes:[], secret:'sec', enforceExp:aFunc});} ).not.toThrow(new Error('enforceExp must be a boolean or a function'));
+  });
 });
 
 describe('functional', function() {
@@ -166,6 +174,17 @@ describe('functional', function() {
         expect(error.code).toBe('token_expired');
         expect(error.message).toBe('This token has expired');
       });
+
+      it('unauthorizes with function', function() {
+        var func = function(req, token, cb) {
+          cb(true);
+        };
+        rbacFunc = rbac({secret:staticSecret});
+        rbacFunc(req, null, next);
+        expect(error.name).toBe(UNAUTHORIZED_ERROR);
+        expect(error.code).toBe('token_expired');
+        expect(error.message).toBe('This token has expired');
+      });
     });
 
     describe('expired but not enforced', function() {
@@ -181,6 +200,15 @@ describe('functional', function() {
 
       it('authorizes', function() {
         rbacFunc = rbac({secret:staticSecret, enforceExp:false});
+        rbacFunc(req, null, next);
+        expect(error).toBe(undefined);
+      });
+
+      it('authorizes with function', function() {
+        var func = function(req, token, cb) {
+          cb(false);
+        };
+        rbacFunc = rbac({secret:staticSecret, enforceExp:func});
         rbacFunc(req, null, next);
         expect(error).toBe(undefined);
       });

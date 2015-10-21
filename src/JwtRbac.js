@@ -16,7 +16,9 @@ module.exports = function(options) {
   var scopes = options.scopes;
   var secret = options.secret;
   var token = options.token || defaultToken;
-  var enforceExp = options.enforceExp === false ? false : true;
+  var enforceExp = options.enforceExp === undefined ||
+    options.enforceExp === null ||
+    options.enforceExp === true ? true : options.enforceExp || false;
   var authRequired = options.authRequired === false ? false : true;
   var privilege = options.privilege;
   var revoked = options.revoked;
@@ -47,6 +49,10 @@ module.exports = function(options) {
 
   if (revoked && typeof(revoked) !== 'function') {
     throw new ConfigError(CONFIG_ERROR, { message: 'revoked must be a function' });
+  }
+
+  if (typeof(enforceExp) !== 'function' && typeof(enforceExp) !== 'boolean') {
+    throw new ConfigError(CONFIG_ERROR, { message: 'enforceExp must be a boolean or a function' });
   }
 
   var setVal = function(key, val, errorCode, errorMessage) {
@@ -111,9 +117,8 @@ module.exports = function(options) {
 
   var checkExp = function() {
     var exp = dot.pick('_meta.decodedToken.exp', this.getData());
-    if (!exp || !enforceExp) {
-      this.resolve();
-    } else {
+
+    var checkIt = function() {
       var now = Date.now();
       if (exp > now) {
         this.resolve();
@@ -121,6 +126,20 @@ module.exports = function(options) {
         setUnauthorizedError.bind(this)('token_expired', 'This token has expired');
         this.reject();
       }
+    };
+
+    if (!exp || !enforceExp) {
+      this.resolve();
+    } else if (enforceExp === true) {
+      checkIt.bind(this)();
+    } else {
+      enforceExp(this.getData().req, this.getData()._meta.decodedToken, function(enforceIt) {
+        if (!enforceIt) {
+          this.resolve();
+        } else {
+          checkIt.bind(this)();
+        }
+      }.bind(this));
     }
   };
 
@@ -200,11 +219,11 @@ module.exports = function(options) {
     .$(getToken)
     .$(decodeToken)
     .$(checkRevoked)
-    .$(checkExp)
     .$(getRoles)
     .$(getScopes)
     .$(checkRoles)
     .$(checkScopes)
+    .$(checkExp)
     .$(checkPrivilege)
     .exec(
       function() {
