@@ -10,7 +10,7 @@ JSON Web Token (JWT) role based access control (RBAC) express middleware.
 
 ### Include
 
-`var JwtRbac = require('@hatchpad/jwt-rbac')`
+`var JwtRbac = require('@hatchpad/jwt-rbac');`
 
 ### Examples
 
@@ -21,6 +21,7 @@ It ensures the token will have a roles property with 'admin' as one of the eleme
 ```
 var express = require('express');
 var router = express.Router();
+var JwtRbac = require('@hatchpad/jwt-rbac');
 
 var canEdit = JwtRbac({
   secret:'jwt-secret',
