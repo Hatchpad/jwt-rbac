@@ -15,7 +15,7 @@ JSON Web Token (JWT) role based access control (RBAC) express middleware.
 ### Examples
 
 #### Very Basic Authentication
-This example assumes there will be a jwt-token in one of the specified locations like "x-auth-token" in the request headers. You can also provide your own function for extracting the token.
+This example assumes there will be a JWT in one of the specified locations like "x-auth-token" in the request headers (see ./src/DefaultToken.js). You can also provide your own function for extracting the token.
 
 It ensures the token will have a roles property with 'admin' as one of the elements
 ```
