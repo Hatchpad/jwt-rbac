@@ -103,6 +103,7 @@ function(req, token, callback) {
   callback(authorize);
 }
 ```
+* if the privilege callback returns false then the request will not be authorized
 
 #### revoked (optional) - function to determine whether the token is revoked
 * must be a function like this:
@@ -112,4 +113,4 @@ function(req, token, callback) {
   callback(revoked);
 }
 ```
-* if the revoked callback return true the request will not be authorized
+* if the revoked callback returns true then the request will not be authorized
