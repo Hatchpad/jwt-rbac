@@ -64,7 +64,7 @@ function(req, token, callback) {
 }
 ```
 
-#### roles (optional) - scopes to require
+#### scopes (optional) - scopes to require
 * can be an array of Strings representing valid token scopes
 * can also be a function like this:
 ```
@@ -82,4 +82,28 @@ function(req, token, callback) {
   callback(false, validJwtToken);
 }
 ```
-  * see ./src/DefaultToken.js to see the default functionality to get the token from the request.
+* see ./src/DefaultToken.js to see the default functionality to get the token from the request.
+
+#### enforceExp (optional) (default is true) - whether to enforce expiration
+* can be a Boolean
+* can also be a function like this:
+function(req, token, callback) {
+  var shouldEnforce = false;
+  callback(shouldEnforce);
+}
+
+#### privilege (optional) - function to determine whether authorized
+* this is useful if the privilege cannot be defined using roles and scopes
+* must be a function like this:
+function(req, token, callback) {
+  var authorize = true;
+  callback(authorize);
+}
+
+#### revoked (optional) - function to determine whether the token is revoked
+* must be a function like this:
+function(req, token, callback) {
+  var revoked = true;
+  callback(revoked);
+}
+* if the revoked callback return true the request will not be authorized
