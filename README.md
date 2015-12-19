@@ -41,7 +41,7 @@ A JWT-RBAC middleware function is created by passing JwtRbac an object with opti
 
 These are the valid options:
 
-#### roles
+#### roles (optional)
 * can be an array of Strings representing valid roles
 * can also be a function like this:
 ```
