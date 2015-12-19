@@ -36,7 +36,8 @@ router.put('/api/users/:id', canEdit, function(req, res, next) {
 ### options
 
 A JWT-RBAC middleware function is created by passing JwtRbac an object with options like so:
-var rbac = JwtRbac(options);
+
+`var rbac = JwtRbac(options);`
 
 These are the valid options:
 
