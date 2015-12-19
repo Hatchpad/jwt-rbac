@@ -87,23 +87,29 @@ function(req, token, callback) {
 #### enforceExp (optional) (default is true) - whether to enforce expiration
 * can be a Boolean
 * can also be a function like this:
+```
 function(req, token, callback) {
   var shouldEnforce = false;
   callback(shouldEnforce);
 }
+```
 
 #### privilege (optional) - function to determine whether authorized
 * this is useful if the privilege cannot be defined using roles and scopes
 * must be a function like this:
+```
 function(req, token, callback) {
   var authorize = true;
   callback(authorize);
 }
+```
 
 #### revoked (optional) - function to determine whether the token is revoked
 * must be a function like this:
+```
 function(req, token, callback) {
   var revoked = true;
   callback(revoked);
 }
+```
 * if the revoked callback return true the request will not be authorized
