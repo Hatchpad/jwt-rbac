@@ -10,7 +10,7 @@ JSON Web Token (JWT) role based access control (RBAC) express middleware.
 
 ### Include
 
-`var Snowman = require('@hatchpad/jwt-rbac')`
+`var JwtRbac = require('@hatchpad/jwt-rbac')`
 
 ### Examples
 
