@@ -4,13 +4,13 @@ JSON Web Token (JWT) role based access control (RBAC) express middleware.
 
 ## Installation
 
-`npm install @hatchpad/jwt-rbac --save`
+`npm install jwt-rbac --save`
 
 ## Usage
 
 ### Include
 
-`var JwtRbac = require('@hatchpad/jwt-rbac');`
+`const JwtRbac = require('jwt-rbac');`
 
 ### Examples
 
@@ -19,11 +19,11 @@ This example assumes there will be a JWT in one of the specified locations like 
 
 It ensures the token will have a roles property with 'admin' as one of the elements
 ```
-var express = require('express');
-var router = express.Router();
-var JwtRbac = require('@hatchpad/jwt-rbac');
+const express = require('express');
+const router = express.Router();
+const JwtRbac = require('jwt-rbac');
 
-var canEdit = JwtRbac({
+const canEdit = JwtRbac({
   secret:'jwt-secret',
   roles: ['admin']
 });
@@ -37,7 +37,7 @@ router.put('/api/users/:id', canEdit, function(req, res, next) {
 
 A JWT-RBAC middleware function is created by passing JwtRbac an object with options like so:
 
-`var rbac = JwtRbac(options);`
+`const rbac = JwtRbac(options);`
 
 Most of the options can be a static value or an asynchronous function. Describing your options as a function can be useful because it gives you access to the request and the token and it is asynchronous.  For example, a user might need to have the "admin" role or perhaps an entity might "belong" to the user so you would be able to fetch it from the database and determine whether the user has the proper privileges.
 
@@ -48,7 +48,7 @@ These are the valid options:
 * can also be a function like this:
 ```
 function(req, token, callback) {
-  var error = false;
+  const error = false;
   callback(error, 'secret-key');
 }
 ```
@@ -58,8 +58,8 @@ function(req, token, callback) {
 * can also be a function like this:
 ```
 function(req, token, callback) {
-  var error = false;
-  var validRoles = ['admin', 'hr'];
+  const error = false;
+  const validRoles = ['admin', 'hr'];
   callback(error, validRoles);
 }
 ```
@@ -78,7 +78,7 @@ function(req, token, callback) {
 * can also be a function like this:
 ```
 function(req, token, callback) {
-  var validJwtToken = 'xxxxxxxx';
+  const validJwtToken = 'xxxxxxxx';
   callback(false, validJwtToken);
 }
 ```
@@ -89,7 +89,7 @@ function(req, token, callback) {
 * can also be a function like this:
 ```
 function(req, token, callback) {
-  var shouldEnforce = false;
+  const shouldEnforce = false;
   callback(shouldEnforce);
 }
 ```
@@ -99,7 +99,7 @@ function(req, token, callback) {
 * must be a function like this:
 ```
 function(req, token, callback) {
-  var authorize = true;
+  const authorize = true;
   callback(authorize);
 }
 ```
@@ -109,7 +109,7 @@ function(req, token, callback) {
 * must be a function like this:
 ```
 function(req, token, callback) {
-  var revoked = true;
+  const revoked = true;
   callback(revoked);
 }
 ```

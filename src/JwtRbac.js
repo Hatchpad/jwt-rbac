@@ -1,10 +1,10 @@
-var defaultToken = require('./DefaultToken');
-var ConfigError = require('../errors/ConfigError');
-var UnauthorizedError = require('../errors/UnauthorizedError');
-var Snowman = require('@hatchpad/node-snowman');
-var dot = require('dot-object');
-var jwt = require('jwt-simple');
-var CONFIG_ERROR = 'ConfigError';
+const defaultToken = require('./DefaultToken');
+const ConfigError = require('../errors/ConfigError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+const Snowman = require('node-snowman');
+const dot = require('dot-object');
+const jwt = require('jwt-simple');
+const CONFIG_ERROR = 'ConfigError';
 
 module.exports = function(options) {
 
@@ -12,16 +12,16 @@ module.exports = function(options) {
     throw new ConfigError(CONFIG_ERROR, { message: 'options is required' });
   }
 
-  var roles = options.roles;
-  var scopes = options.scopes;
-  var secret = options.secret;
-  var token = options.token || defaultToken;
-  var enforceExp = options.enforceExp === undefined ||
+  let roles = options.roles;
+  let scopes = options.scopes;
+  let secret = options.secret;
+  let token = options.token || defaultToken;
+  let enforceExp = options.enforceExp === undefined ||
     options.enforceExp === null ||
     options.enforceExp === true ? true : options.enforceExp || false;
-  var authRequired = options.authRequired === false ? false : true;
-  var privilege = options.privilege;
-  var revoked = options.revoked;
+  let authRequired = options.authRequired === false ? false : true;
+  let privilege = options.privilege;
+  let revoked = options.revoked;
 
   if (roles && !Array.isArray(roles) && typeof(roles) !== 'function') {
     throw new ConfigError(CONFIG_ERROR, { message: 'roles must be an array or a function' });
@@ -55,7 +55,7 @@ module.exports = function(options) {
     throw new ConfigError(CONFIG_ERROR, { message: 'enforceExp must be a boolean or a function' });
   }
 
-  var setVal = function(key, val, errorCode, errorMessage) {
+  const setVal = function(key, val, errorCode, errorMessage) {
     if (typeof(val) !== 'function') {
       dot.str('_meta.' + key, val, this.getData());
       this.resolve();
@@ -74,33 +74,33 @@ module.exports = function(options) {
     }
   };
 
-  var getSecret = function() {
+  const getSecret = function() {
     setVal.bind(this)('secret', secret);
   };
 
-  var getToken = function() {
+  const getToken = function() {
     setVal.bind(this)('token', token, 'token_required', 'Token is required');
   };
 
-  var getRoles = function() {
+  const getRoles = function() {
     setVal.bind(this)('roles', roles);
   };
 
-  var getScopes = function() {
+  const getScopes = function() {
     setVal.bind(this)('scopes', scopes);
   };
 
-  var decodeToken = function() {
-    var secret = dot.pick('_meta.secret', this.getData());
-    var token = dot.pick('_meta.token', this.getData());
+  const decodeToken = function() {
+    const secret = dot.pick('_meta.secret', this.getData());
+    const token = dot.pick('_meta.token', this.getData());
     if (!secret || !token) {
       setUnauthorizedError.bind(this)('token_required', 'Token is required in req.headers["x-auth-token"]');
       this.reject();
     } else {
-      var resolve = true;
+      let resolve = true;
       try {
-        var decodedToken = jwt.decode(token, secret);
-        var req = dot.pick('req', this.getData());
+        const decodedToken = jwt.decode(token, secret);
+        const req = dot.pick('req', this.getData());
         dot.str('_meta.decodedToken', decodedToken, this.getData());
         req.user = decodedToken;
       } catch (err) {
@@ -115,11 +115,11 @@ module.exports = function(options) {
     }
   };
 
-  var checkExp = function() {
-    var exp = dot.pick('_meta.decodedToken.exp', this.getData());
+  const checkExp = function() {
+    const exp = dot.pick('_meta.decodedToken.exp', this.getData());
 
-    var checkIt = function() {
-      var now = Date.now();
+    const checkIt = function() {
+      const now = Date.now();
       if (exp > now) {
         this.resolve();
       } else {
@@ -143,7 +143,7 @@ module.exports = function(options) {
     }
   };
 
-  var checkPrivilege = function() {
+  const checkPrivilege = function() {
     if (!privilege) {
       this.resolve();
     } else {
@@ -158,7 +158,7 @@ module.exports = function(options) {
     }
   };
 
-  var checkRevoked = function() {
+  const checkRevoked = function() {
     if (!revoked) {
       this.resolve();
     } else {
@@ -173,20 +173,19 @@ module.exports = function(options) {
     }
   };
 
-  var setUnauthorizedError = function(code, message) {
-    var error = new
+  const setUnauthorizedError = function(code, message) {
     dot.str('_meta.unauthorizedError', new UnauthorizedError(code, message), this.getData());
   };
 
-  var sourceArrayContainsOneOfTargetArray = function(sourceArr, targetArr, unauthorizedErrorCode, unauthorizedErrorMessage) {
+  const sourceArrayContainsOneOfTargetArray = function(sourceArr, targetArr, unauthorizedErrorCode, unauthorizedErrorMessage) {
     if (!targetArr || targetArr.length == 0) {
       this.resolve();
     } else if (!sourceArr) {
       setUnauthorizedError.bind(this)(unauthorizedErrorCode, unauthorizedErrorMessage);
       this.reject();
     } else {
-      var contains = false;
-      for (var key in sourceArr) {
+      let contains = false;
+      for (let key in sourceArr) {
         if (targetArr.indexOf(sourceArr[key]) >= 0) {
           contains = true;
           break;
@@ -201,15 +200,15 @@ module.exports = function(options) {
     }
   };
 
-  var checkRoles = function() {
-    var targetRoles = dot.pick('_meta.decodedToken.roles', this.getData());
-    var requiredRoles = dot.pick('_meta.roles', this.getData());
+  const checkRoles = function() {
+    const targetRoles = dot.pick('_meta.decodedToken.roles', this.getData());
+    const requiredRoles = dot.pick('_meta.roles', this.getData());
     sourceArrayContainsOneOfTargetArray.bind(this)(targetRoles, requiredRoles, 'missing_role', 'This token is missing the required role');
   };
 
-  var checkScopes = function() {
-    var targetScopes = dot.pick('_meta.decodedToken.scopes', this.getData());
-    var requiredScopes = dot.pick('_meta.scopes', this.getData());
+  const checkScopes = function() {
+    const targetScopes = dot.pick('_meta.decodedToken.scopes', this.getData());
+    const requiredScopes = dot.pick('_meta.scopes', this.getData());
     sourceArrayContainsOneOfTargetArray.bind(this)(targetScopes, requiredScopes, 'missing_scope', 'This token is missing the required scope');
   };
 
@@ -230,7 +229,7 @@ module.exports = function(options) {
         next();
       },
       function() {
-        var error = dot.pick('_meta.unauthorizedError', this.getData());
+        const error = dot.pick('_meta.unauthorizedError', this.getData());
         if (!authRequired && error.code === 'token_revoked') {
           next(error);
         } else if (!authRequired && error.code === 'token_required') {

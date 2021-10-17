@@ -1,13 +1,13 @@
-var rbac = require('../.');
-var ConfigError = require('../errors/ConfigError');
-var jwt = require('jwt-simple');
+const rbac = require('../.');
+const ConfigError = require('../errors/ConfigError');
+const jwt = require('jwt-simple');
 
-var UNAUTHORIZED_ERROR = 'UnauthorizedError';
+const UNAUTHORIZED_ERROR = 'UnauthorizedError';
 
-var aFunc = function() {};
-var error;
+const aFunc = function() {};
+let error;
 
-var next = function(err) {
+const next = function(err) {
   error = err;
 };
 
@@ -78,14 +78,14 @@ describe('options and default params', function() {
 });
 
 describe('functional', function() {
-  var staticSecret = 'SEC';
+  const staticSecret = 'SEC';
 
-  var createToken = function(obj, secret) {
+  const createToken = function(obj, secret) {
     return jwt.encode(obj, secret);
   };
 
   describe('very basic roles', function() {
-    var rbacFunc, token, req;
+    let rbacFunc, token, req;
 
     beforeEach(function() {
       error = null;
@@ -114,8 +114,24 @@ describe('functional', function() {
     });
   });
 
+  describe('bearer token', function() {
+    let rbacFunc, token, req;
+
+    beforeEach(function () {
+      error = null;
+      token = createToken({roles: ['general', 'admin']}, staticSecret);
+      req = {headers: {'Authorization': `Bearer ${token}`}};
+    });
+
+    it('authorizes correctly', function () {
+      rbacFunc = rbac({roles: ['general'], secret: staticSecret});
+      rbacFunc(req, null, next);
+      expect(error).toBe(undefined);
+    });
+  });
+
   describe('very basic scopes', function() {
-    var rbacFunc, token, req;
+    let rbacFunc, token, req;
 
     beforeEach(function() {
       error = null;
@@ -139,7 +155,7 @@ describe('functional', function() {
   });
 
   describe('exp', function() {
-    var rbacFunc, token, req;
+    let rbacFunc, token, req;
 
     describe('not expired', function() {
       beforeEach(function() {
@@ -159,7 +175,7 @@ describe('functional', function() {
     describe('expired', function() {
       beforeEach(function(done) {
         error = null;
-        var now = Date.now();
+        const now = Date.now();
         token = createToken({exp: now}, staticSecret);
         req = {headers: {'x-auth-token': token}};
         setTimeout(function() {
@@ -176,7 +192,7 @@ describe('functional', function() {
       });
 
       it('unauthorizes with function', function() {
-        var func = function(req, token, cb) {
+        const func = function(req, token, cb) {
           cb(true);
         };
         rbacFunc = rbac({secret:staticSecret});
@@ -190,7 +206,7 @@ describe('functional', function() {
     describe('expired but not enforced', function() {
       beforeEach(function(done) {
         error = null;
-        var now = Date.now();
+        const now = Date.now();
         token = createToken({exp: now}, staticSecret);
         req = {headers: {'x-auth-token': token}};
         setTimeout(function() {
@@ -205,7 +221,7 @@ describe('functional', function() {
       });
 
       it('authorizes with function', function() {
-        var func = function(req, token, cb) {
+        const func = function(req, token, cb) {
           cb(false);
         };
         rbacFunc = rbac({secret:staticSecret, enforceExp:func});
@@ -216,7 +232,7 @@ describe('functional', function() {
   });
 
   describe('token issues', function() {
-    var rbacFunc, token, req;
+    let rbacFunc, token, req;
 
     describe('required', function() {
       beforeEach(function() {
@@ -263,7 +279,7 @@ describe('functional', function() {
   });
 
   describe('privileges', function() {
-    var rbacFunc, privilegeFunc, token, req;
+    let rbacFunc, privilegeFunc, token, req;
 
     beforeEach(function() {
       error = null;
@@ -293,7 +309,7 @@ describe('functional', function() {
   });
 
   describe('revoked', function() {
-    var rbacFunc, privilegeFunc, token, req;
+    let rbacFunc, token, req;
 
     beforeEach(function() {
       error = null;
@@ -323,7 +339,7 @@ describe('functional', function() {
   });
 
   describe('smoke tests with functions', function() {
-    var rbacFunc, token, req, rolesFunc1, rolesFunc2;
+    let rbacFunc, token, req, rolesFunc1, rolesFunc2;
 
     beforeEach(function() {
       rolesFunc1 = function(req, cb) {
